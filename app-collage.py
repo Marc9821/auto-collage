@@ -1,6 +1,6 @@
 import os
 import glob
-from tkinter import Y
+from tkinter import *
 from PIL import Image
 from selector import draw
 
