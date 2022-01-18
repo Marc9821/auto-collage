@@ -30,7 +30,7 @@ def create_collage():
             return
 
     #create collage
-    running_row, running_col = 0, 0
+    running_row = running_col = 0
     for row in range(n_rows):
         for col in range(n_cols):
             img = Image.open(image_list[row][col])
@@ -70,13 +70,14 @@ def create_collage():
     delete_images(folders)
     
 def delete_images(folders):
+    directory = os.getcwd()
     prompt = 'Delete files in folders? (y/n):\n   '
     ans = input(prompt).strip().lower()
     if ans not in ['y', 'n']:
         return delete_images()
     if ans == 'y':
         for folder in folders:
-            dir = 'F:/Marc/Github/Auto-Collage/' + folder
+            dir = directory.replace(r'/', '/') + '/' + folder
             for f in os.listdir(dir):
                 os.remove(os.path.join(dir, f))
         return

@@ -1,4 +1,3 @@
-from fileinput import close
 from tkinter import *  
 from PIL import ImageTk, Image
 
@@ -100,6 +99,7 @@ def zoomer(event, arg, current_position):
     x1, y1, x2, y2 = current_position
     width = x2 - x1
     height = y2 - y1
+    #do not allow rectangle to be bigger than image or smaller than 20% of original image width
     if event.char == '-':
         if width/scaling_factor > max_width or height/scaling_factor > max_height:
             return
