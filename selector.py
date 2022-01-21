@@ -29,12 +29,21 @@ def draw(image_name, width, height):
     
     create_rectangle(root, canvas, border_w, border_h, border_w + img_max_width, border_h + img_max_height, fill='red', alpha=.2)
     
-    data = {'canvas': canvas, 'border_w': border_w, 'border_h': border_h, 'img_size': img_size, 'root': root}
-    
     global last_coords
     last_coords = [(border_w, border_h, border_w + img_max_width, border_h + img_max_height)]
     
+    my_label = Label(root, text="")
+    my_label.pack(pady=10)
+    
+    data = {'canvas': canvas, 'border_w': border_w, 'border_h': border_h, 'img_size': img_size, 'root': root, 'my_label': my_label}
+    
     root.bind("<Key>", lambda event, arg=data: keypress(event, arg))
+    root.bind("<B1-Motion>", lambda event, arg=data: mouse_move(event, arg))
+    root.bind("<MouseWheel>", lambda event, arg=data: mouse_zoom(event, arg))
+    root.bind("<Return>", lambda e: root.destroy())
+    root.state('zoomed')
+    root.grab_set()
+    root.focus()
     root.mainloop()
     
     x, y, x1, y1 = calc_coords(last_coords, border_w, border_h)
@@ -70,8 +79,7 @@ def keypress(event, arg):
     
     if len(last_coords) > 1:
         last_coords.pop(0)
-    x = 0
-    y = 0
+    x = y = 0
     if event.char == "a": 
         x = -10
         if current_position[0] + x < c_x_min:
@@ -99,16 +107,25 @@ def zoomer(event, arg, current_position):
     x1, y1, x2, y2 = current_position
     width = x2 - x1
     height = y2 - y1
-    #do not allow rectangle to be bigger than image or smaller than 20% of original image width
+    
+    mode = ''
     if event.char == '-':
+        mode = 'out'
+    elif event.char == '+':
+        mode = 'in'
+    elif event.delta >= 0:
+        mode = 'out'
+    else:
+        mode = 'in'
+    
+    #do not allow rectangle to be bigger than image or smaller than 20% of original image width
+    if mode == 'out':
         if width/scaling_factor > max_width or height/scaling_factor > max_height:
             return
     elif width/max_width < 0.2 or height/max_height < 0.2:
         return
-    #delete old rectangle
-    canvas.delete('rect')
-    #create new rectangle
-    if event.char == '+':
+    #initiate new rectangle creation
+    if mode == 'in':
         w_n = int(width * scaling_factor)
         h_n = int(height * scaling_factor)
     else:
@@ -116,8 +133,20 @@ def zoomer(event, arg, current_position):
         h_n = int(height / scaling_factor)
     border_w = arg['border_w']
     border_h = arg['border_h']
+    #delete old rectangle
+    canvas.delete('rect')
+    #create new rectangle
     create_rectangle(root, canvas, border_w, border_h, border_w + w_n, border_h + h_n, fill='red', alpha=.2)
-    
+
+def mouse_move(event, arg):
+    my_label = arg['my_label']
+    my_label.config(text=f'Coordinates: x={event.x} y={event.y}')
+
+def mouse_zoom(event, arg):
+    canvas = arg['canvas']
+    current_position = canvas.bbox('rect')
+    zoomer(event, arg, current_position)
+
 def calc_coords(coordinates, border_w, border_h):
     x = coordinates[0][0]-border_w
     y = coordinates[0][1]-border_h
