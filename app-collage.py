@@ -12,7 +12,7 @@ def create_collage():
     folders = ["O","B","L","A","A2","C"]
     row_dist, col_dist = 30, 30
     
-    collage = (img_max_width * n_rows + row_dist * (n_rows - 1), img_max_height * n_cols + col_dist * (n_cols - 1))
+    collage = (img_max_width * n_cols + col_dist * (n_cols - 1), img_max_height * n_rows + row_dist * (n_rows - 1))
     new = Image.new("RGBA", collage, "WHITE")
 
     #read in all images
@@ -42,10 +42,10 @@ def create_collage():
             
             if w_ratio > h_ratio:
                 img = img.resize((int(w * w_ratio), int(h * w_ratio)))
-                x, y, x1, y1 = draw(image_list[row][col], int(w * w_ratio), int(h * w_ratio))
+                x, y, x1, y1 = draw(image_list[row][col], int(w * w_ratio), int(h * w_ratio), img_max_width, img_max_height)
             else:
                 img = img.resize((int(w * h_ratio), int(h * h_ratio)))
-                x, y, x1, y1 = draw(image_list[row][col], int(w * h_ratio), int(h * h_ratio))
+                x, y, x1, y1 = draw(image_list[row][col], int(w * h_ratio), int(h * h_ratio), img_max_width, img_max_height)
             
             img = img.crop((x, y, x1, y1))
             

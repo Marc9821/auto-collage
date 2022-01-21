@@ -2,10 +2,7 @@ from tkinter import *
 from PIL import ImageTk, Image
 
 
-def draw(image_name, width, height):    
-    img_max_width = 520
-    img_max_height = 652
-
+def draw(image_name, width, height, img_max_width, img_max_height):    
     root = Tk()  
     canvas = Canvas(root, width=width*1.1, height=height*1.1)  
     canvas.pack()
@@ -41,6 +38,7 @@ def draw(image_name, width, height):
     root.bind("<B1-Motion>", lambda event, arg=data: mouse_move(event, arg))
     root.bind("<MouseWheel>", lambda event, arg=data: mouse_zoom(event, arg))
     root.bind("<Return>", lambda e: root.destroy())
+    root.bind("<Motion>", lambda event, arg=data: check_hand(event, arg))
     root.state('zoomed')
     root.grab_set()
     root.focus()
@@ -63,19 +61,19 @@ def create_rectangle(root, canvas, x,y,a,b,**options):
         
 def keypress(event, arg):
     canvas = arg['canvas']
+    current_position = canvas.bbox('rect')
+    
+    if event.char == '+' or event.char == '-':
+        zoomer(event, arg, current_position)
     
     # do not allow rectangle to move outside of selectable area
     border_w = arg['border_w']
     border_h = arg['border_h']
     img_size = arg['img_size']
-    current_position = canvas.bbox('rect')
     c_x_min = border_w
     c_x_max = border_w + img_size[0]
     c_y_min = border_h
     c_y_max = border_h + img_size[1]
-    
-    if event.char == '+' or event.char == '-':
-        zoomer(event, arg, current_position)
     
     if len(last_coords) > 1:
         last_coords.pop(0)
@@ -109,13 +107,9 @@ def zoomer(event, arg, current_position):
     height = y2 - y1
     
     mode = ''
-    if event.char == '-':
+    if event.char == '-' or event.delta > 0:
         mode = 'out'
-    elif event.char == '+':
-        mode = 'in'
-    elif event.delta >= 0:
-        mode = 'out'
-    else:
+    elif event.char == '+' or event.delta < 0:
         mode = 'in'
     
     #do not allow rectangle to be bigger than image or smaller than 20% of original image width
@@ -137,15 +131,53 @@ def zoomer(event, arg, current_position):
     canvas.delete('rect')
     #create new rectangle
     create_rectangle(root, canvas, border_w, border_h, border_w + w_n, border_h + h_n, fill='red', alpha=.2)
+    
+    if len(last_coords) > 1:
+        last_coords.pop(0)
+    last_coords.append(canvas.bbox('rect'))
 
 def mouse_move(event, arg):
+    canvas = arg['canvas']
+    img_size = arg['img_size']
     my_label = arg['my_label']
     my_label.config(text=f'Coordinates: x={event.x} y={event.y}')
+    current_position = canvas.bbox('rect')
+    img_width = current_position[2] - current_position[0]
+    img_height = current_position[2] - current_position[0]
+    border_w = arg['border_w']
+    border_h = arg['border_h']
+    c_x_min = border_w
+    c_x_max = border_w + img_size[0]
+    c_y_min = border_h
+    c_y_max = border_h + img_size[1]
+    
+    if len(last_coords) > 1:
+        last_coords.pop(0)
+
+    canvas_x = event.x - img_width/2
+    canvas_y = event.y - img_height/2
+
+    x = canvas_x - current_position[0]
+    y = canvas_y - current_position[1]
+    
+    if current_position[0] + x < c_x_min or current_position[1] + y < c_y_min or current_position[2] + x > c_x_max or current_position[3] + y > c_y_max:
+        return
+
+    canvas.move('rect', x, y)
+    last_coords.append(canvas.bbox('rect'))
 
 def mouse_zoom(event, arg):
     canvas = arg['canvas']
     current_position = canvas.bbox('rect')
     zoomer(event, arg, current_position)
+    
+def check_hand(event, arg):
+    canvas = arg['canvas']
+    current_position = canvas.bbox('rect')
+    if current_position[0] < event.x and current_position[2] > event.x and current_position[1] < event.y and current_position[3] > event.y:
+        canvas.config(cursor="diamond_cross")
+    else:
+        canvas.config(cursor="")
 
 def calc_coords(coordinates, border_w, border_h):
     x = coordinates[0][0]-border_w
