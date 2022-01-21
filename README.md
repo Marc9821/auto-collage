@@ -6,4 +6,5 @@
 
 ## to-do:
 
-1. Rework optics
+1. Allow rotation with E and Q
+2. Rework optics
