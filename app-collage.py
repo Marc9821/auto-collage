@@ -8,7 +8,7 @@ def create_collage():
 
     #settings
     img_max_width, img_max_height = 520, 652
-    n_rows, n_cols = 6, 6
+    n_rows = 6
     folders = ["O","B","L","A","A2","C"]
     row_dist, col_dist = 30, 30
     
@@ -22,6 +22,8 @@ def create_collage():
         for filename in glob.glob(folder + '\*.jpg'):
             temp_list.append(filename)
         image_list.append(temp_list)
+        
+    n_cols = len(image_list[0])
     
     #check if enough images available   
     for i, img_list in enumerate(image_list):

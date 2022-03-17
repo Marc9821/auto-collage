@@ -8,6 +8,12 @@ total_height = 0
 image_list = []
 for filename in glob.glob('xCombine\*.jpg'):
     image_list.append(filename)
+for filename in glob.glob('xCombine\*.png'):
+    image_list.append(filename)
+for filename in glob.glob('xCombine\*.jpeg'):
+    image_list.append(filename)
+    
+image_list.sort()
 
 open_images = []
 for img in image_list:
