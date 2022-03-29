@@ -11,9 +11,6 @@ def create_collage():
     n_rows = 6
     folders = ["O","B","L","A","A2","C"]
     row_dist, col_dist = 30, 30
-    
-    collage = (img_max_width * n_cols + col_dist * (n_cols - 1), img_max_height * n_rows + row_dist * (n_rows - 1))
-    new = Image.new("RGBA", collage, "WHITE")
 
     #read in all images
     image_list = []
@@ -21,9 +18,18 @@ def create_collage():
         temp_list = []
         for filename in glob.glob(folder + '\*.jpg'):
             temp_list.append(filename)
+        for filename in glob.glob(folder + '\*.png'):
+            temp_list.append(filename)
+        for filename in glob.glob(folder + '\*.jpeg'):
+            temp_list.append(filename)
+        temp_list.sort()
         image_list.append(temp_list)
         
     n_cols = len(image_list[0])
+    
+    
+    collage = (img_max_width * n_cols + col_dist * (n_cols - 1), img_max_height * n_rows + row_dist * (n_rows - 1))
+    new = Image.new("RGBA", collage, "WHITE")
     
     #check if enough images available   
     for i, img_list in enumerate(image_list):
