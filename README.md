@@ -8,3 +8,7 @@
 
 1. Allow rotation with E and Q
 2. Rework optics
+
+# auto-combiner
+
+- You can combine different images into one large image
